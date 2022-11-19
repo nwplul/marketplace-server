@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import * as UserService from "../services/user.service";
+import { z, ZodError } from "zod";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
 export const getUsers = (req: Request, res: Response) => {
   UserService.ListAllUsers()
@@ -13,10 +15,22 @@ export const getUsers = (req: Request, res: Response) => {
     .catch((e) => res.status(500).send(e.message));
 };
 
-export const createUser = (req: Request, res: Response) => {
-  const { name, email } = req.body;
+export const createUser = async (req: Request, res: Response) => {
+  const createUserBody = z.object({
+    name: z.string(),
+    email: z.string().email(),
+  });
 
-  UserService.createUser(req.body)
+  const User = await createUserBody.safeParseAsync(req.body);
+
+  if (!User.success) {
+    return res.status(400).send({
+      message: "Type error",
+      errors: User.error.issues,
+    });
+  }
+
+  UserService.createUser(User.data)
     .then((response) => {
       if (response) {
         return res.status(201).send({
@@ -29,10 +43,11 @@ export const createUser = (req: Request, res: Response) => {
         message: "Nao foi possivel criar o usuario",
       });
     })
-    .catch((e) =>
+    .catch((e: PrismaClientKnownRequestError) =>
       res.status(500).send({
-        status: 500,
+        code: e.code,
         message: e.message,
+        cause: e.meta?.target,
       })
     );
 };
