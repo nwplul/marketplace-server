@@ -7,6 +7,6 @@ export const ListAllItems = async () => {
 
 export const createItem = async ({ title, price }: ItemProps) => {
   return await db.items.create({
-    data: { title, price, release_date: new Date() },
+    data: { title, price },
   });
 };
