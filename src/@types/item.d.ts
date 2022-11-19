@@ -1,10 +1,8 @@
 export interface ItemProps {
-  id: string;
-  createdAt: Date;
   name: string;
   description: string;
-  price: string;
+  price: number;
   brand: string;
   rating: number;
-  url_image: string;
+  url_image?: string | undefined;
 }

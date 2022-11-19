@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import * as UserService from "../services/user.service";
-import { z, ZodError } from "zod";
+import { z } from "zod";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
 export const getUsers = (req: Request, res: Response) => {
