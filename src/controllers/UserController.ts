@@ -16,17 +16,16 @@ export const getUsers = (req: Request, res: Response) => {
 export const createUser = (req: Request, res: Response) => {
   const { name, email } = req.body;
 
-  UserService.createUser({ name, email })
+  UserService.createUser(req.body)
     .then((response) => {
       if (response) {
         return res.status(201).send({
-          status: "success",
+          message: "success",
           user: response,
         });
       }
 
       return res.status(400).send({
-        status: "error",
         message: "Nao foi possivel criar o usuario",
       });
     })

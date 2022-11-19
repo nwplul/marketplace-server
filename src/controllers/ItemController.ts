@@ -16,7 +16,7 @@ export const getItems = (req: Request, res: Response) => {
 export const createItem = (req: Request, res: Response) => {
   const { id, title, price, image } = req.body;
 
-  ItemService.createItem({ id, title, price, image })
+  ItemService.createItem(req.body)
     .then((response) => {
       if (response) {
         return res.status(201).send({
