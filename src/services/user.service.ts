@@ -1,4 +1,4 @@
-import { UserProps } from "../@types/user";
+import { UserProps } from "../@types/User";
 import { db } from "../utils/db.server";
 
 export const ListAllUsers = async () => {

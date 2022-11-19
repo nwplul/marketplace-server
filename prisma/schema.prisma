@@ -8,13 +8,15 @@ datasource db {
 }
 
 model User {
-  id              String           @id @default(uuid())
-  email           String           @unique
-  name            String
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   purchased_items PurchasedItem[] @relation("user")
   Cart            Cart[]
+  Favorites       Favorites[]
 
   @@map("users")
 }
@@ -27,18 +29,33 @@ model Item {
   price       Decimal
   brand       String
   rating      Int      @default(0)
-  url_image   String
+  url_image   String?
 
   PurchasedItems PurchasedItem[]
   Cart           Cart[]
+  Favorites      Favorites[]
 
   @@map("items")
+}
+
+model Favorites {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user_id String
+  item_id String
+
+  User User @relation(fields: [user_id], references: [id])
+  Item Item @relation(fields: [item_id], references: [id])
+
+  @@map("favorites")
 }
 
 model PurchasedItem {
   userId String
   itemId String
-  status String @default("WISHLIST")
+  status String @default("PURCHASED")
 
   user User @relation("user", fields: [userId], references: [id])
   item Item @relation(fields: [itemId], references: [id])
