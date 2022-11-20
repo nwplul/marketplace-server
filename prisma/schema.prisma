@@ -48,7 +48,8 @@ model Favorites {
 
   User User @relation(fields: [user_id], references: [id])
   Item Item @relation(fields: [item_id], references: [id])
-
+  
+  @@unique([user_id, item_id])
   @@map("favorites")
 }
 
