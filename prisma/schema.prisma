@@ -8,30 +8,74 @@ datasource db {
 }
 
 model User {
-  id              String           @id @default(uuid())
-  email           String           @unique
-  name            String
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  purchased_items PurchasedItems[] @relation("user")
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  purchased_items PurchasedItem[] @relation("user")
+  Cart            Cart[]
+  Favorites       Favorites[]
 
   @@map("users")
 }
 
-model Items {
-  id        String   @id @default(uuid())
-  title     String   @unique
-  price     Decimal
-  createdAt DateTime @default(now())
+model Item {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  name        String
+  description String
+  price       Decimal
+  brand       String
+  rating      Int      @default(0)
+  url_image   String?
+
+  PurchasedItems PurchasedItem[]
+  Cart           Cart[]
+  Favorites      Favorites[]
 
   @@map("items")
 }
 
-model PurchasedItems {
-  user   User   @relation("user", fields: [userId], references: [id])
+model Favorites {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user_id String
+  item_id String
+
+  User User @relation(fields: [user_id], references: [id])
+  Item Item @relation(fields: [item_id], references: [id])
+  
+  @@unique([user_id, item_id])
+  @@map("favorites")
+}
+
+model PurchasedItem {
   userId String
-  status String @default("WISHLIST")
+  itemId String
+  status String @default("PURCHASED")
+
+  user User @relation("user", fields: [userId], references: [id])
+  item Item @relation(fields: [itemId], references: [id])
 
   @@id([userId])
   @@map("purchased_items")
+}
+
+model Cart {
+  id        String   @id @default(uuid())
+  userId    String
+  itemId    String
+  quantity  Int      @default(1)
+  status    String   @default("CART")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  item Item @relation(fields: [itemId], references: [id])
+
+  @@map("carts")
 }

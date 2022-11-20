@@ -1,4 +1,6 @@
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { Request, Response } from "express";
+import { z } from "zod";
 import * as ItemService from "../services/item.service";
 
 export const getItems = (req: Request, res: Response) => {
@@ -13,27 +15,43 @@ export const getItems = (req: Request, res: Response) => {
     .catch((e) => res.status(500).send(e.message));
 };
 
-export const createItem = (req: Request, res: Response) => {
-  const { id, title, price, image } = req.body;
+export const createItem = async (req: Request, res: Response) => {
+  const createItemBody = z.object({
+    name: z.string(),
+    price: z.number(),
+    description: z.string(),
+    brand: z.string(),
+    url_image: z.optional(z.string()),
+    rating: z.number(),
+  });
 
-  ItemService.createItem({ id, title, price, image })
+  const Item = await createItemBody.safeParseAsync(req.body);
+
+  if (!Item.success) {
+    return res.status(400).send({
+      message: "Type error",
+      errors: Item.error.issues,
+    });
+  }
+
+  ItemService.createItem(Item.data)
     .then((response) => {
       if (response) {
         return res.status(201).send({
-          status: "success",
+          message: "success",
           item: response,
         });
       }
 
       return res.status(400).send({
-        status: "error",
         message: "Nao foi possivel criar o item",
       });
     })
-    .catch((e) =>
+    .catch((e: PrismaClientKnownRequestError) =>
       res.status(500).send({
-        status: 500,
+        code: e.code,
         message: e.message,
+        cause: e.meta?.target,
       })
     );
 };
